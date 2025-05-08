@@ -37,23 +37,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/extensions/available").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/extensions/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/extensions/login").authenticated()
                         .requestMatchers(HttpMethod.GET, "/extensions/range").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/extensions/logout/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/extensions/logout/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/extensions/all").permitAll()
-
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
-
                         .anyRequest().authenticated()
 
 
                 )
-
-
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
