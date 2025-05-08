@@ -20,6 +20,21 @@ Tecnologias Utilizadas
 
 -   **SpringDoc OpenAPI**: Para documentar as APIs REST.
 
+Estrutura do Projeto
+--------------------
+
+A estrutura do projeto segue o padrão do Spring Boot. Aqui estão algumas pastas importantes:
+
+-   `controllers/`: Contém os controladores responsáveis pelas rotas da API.
+
+-   `domain/`: Contém as entidades do sistema.
+
+-   `dto/`: Contém os objetos de transferência de dados (DTOs).
+
+-   `repositories/`: Contém os repositórios JPA.
+
+-   `infra/security/`: Contém classes de segurança, como o serviço para gerar e validar tokens JWT.
+
 Como Rodar o Projeto
 --------------------
 
@@ -201,18 +216,3 @@ Testes
 Para rodar os testes da aplicação, use o comando:
 
 `mvn test`
-
-Estrutura do Projeto
---------------------
-
-A estrutura do projeto segue o padrão do Spring Boot. Aqui estão algumas pastas importantes:
-
--   `controllers/`: Contém os controladores responsáveis pelas rotas da API.
-
--   `domain/`: Contém as entidades do sistema.
-
--   `dto/`: Contém os objetos de transferência de dados (DTOs).
-
--   `repositories/`: Contém os repositórios JPA.
-
--   `infra/security/`: Contém classes de segurança, como o serviço para gerar e validar tokens JWT.
