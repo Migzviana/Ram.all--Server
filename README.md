@@ -116,10 +116,6 @@ Obtém todos os ramais registrados.
 
 **Resposta de sucesso**:
 
-json
-
-CopiarEditar
-
 `[
   {
     "extensionNumber": "1001",
