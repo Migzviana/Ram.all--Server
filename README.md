@@ -40,7 +40,7 @@ Como Rodar o Projeto
 
 ### 1\. Clonar o repositório
 
-`git clone <URL_DO_REPOSITORIO>
+`git clone https://github.com/Migzviana/Ram.all--Server
 cd Ramal_back`
 
 ### 2\. Instalar as dependências
