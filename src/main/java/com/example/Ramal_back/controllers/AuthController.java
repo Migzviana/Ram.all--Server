@@ -30,7 +30,7 @@ public class AuthController {
     public ResponseEntity login(@RequestBody LoginRequestDTO body) {
         try {
             User user = this.repository.findByEmail(body.email())
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado a."));
 
             if (passwordEncoder.matches(body.password(), user.getPassword())) {
                 String token = this.tokenService.generateToken(user);
