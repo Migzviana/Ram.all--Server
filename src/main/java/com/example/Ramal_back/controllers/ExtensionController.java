@@ -58,6 +58,30 @@ public class ExtensionController {
         }
     }
 
+    @GetMapping("/range")
+    public ResponseEntity<?> rangeExtensions(@RequestParam int inicio, @RequestParam int fim) {
+        try {
+            if (inicio > fim) {
+                return ResponseEntity.status(404).body(Map.of("message", "Intervalo inválido: Início maior que o fim"));
+            }
+
+            List<String> rangeNumeros = new ArrayList<>();
+            for (int i = inicio; i <= fim; i++) {
+                rangeNumeros.add(String.valueOf(i));
+            }
+
+            List<Extension> extensionsInRange = extensionRepository.findByExtensionNumberIn(rangeNumeros);
+
+            List<ExtensionResponseDTO> response = extensionsInRange.stream()
+                    .map(ext -> new ExtensionResponseDTO(ext.getExtensionNumber(), ext.getLoggedUser()))
+                    .toList();
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("message", "Erro ao buscar ramais no intervalo informado."));
+        }
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> loginExtension(@RequestBody @Valid ExtensionLoginDTO dto, HttpServletRequest request) {
         try {
@@ -144,30 +168,6 @@ public class ExtensionController {
             return ResponseEntity.ok(Map.of("message", "Logout realizado com sucesso."));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", "Erro ao realizar logout do ramal."));
-        }
-    }
-
-    @GetMapping("/range")
-    public ResponseEntity<?> rangeExtensions(@RequestParam int inicio, @RequestParam int fim) {
-        try {
-            if (inicio > fim) {
-                return ResponseEntity.status(404).body(Map.of("message", "Intervalo inválido: Início maior que o fim"));
-            }
-
-            List<String> rangeNumeros = new ArrayList<>();
-            for (int i = inicio; i <= fim; i++) {
-                rangeNumeros.add(String.valueOf(i));
-            }
-
-            List<Extension> extensionsInRange = extensionRepository.findByExtensionNumberIn(rangeNumeros);
-
-            List<ExtensionResponseDTO> response = extensionsInRange.stream()
-                    .map(ext -> new ExtensionResponseDTO(ext.getExtensionNumber(), ext.getLoggedUser()))
-                    .toList();
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("message", "Erro ao buscar ramais no intervalo informado."));
         }
     }
 }
