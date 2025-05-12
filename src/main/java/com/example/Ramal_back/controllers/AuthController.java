@@ -2,6 +2,7 @@ package com.example.Ramal_back.controllers;
 
 import com.example.Ramal_back.domain.user.User;
 import com.example.Ramal_back.dto.*;
+import com.example.Ramal_back.infra.security.TokenGenerator;
 import com.example.Ramal_back.infra.security.TokenService;
 import com.example.Ramal_back.repositories.UserRepository;
 import com.example.Ramal_back.infra.service.EmailService;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,12 +25,13 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
     private final EmailService emailService;
+    private final TokenGenerator tokenGenerator;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody LoginRequestDTO body) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO body) {
         try {
             User user = this.repository.findByEmail(body.email())
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado a."));
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
             if (passwordEncoder.matches(body.password(), user.getPassword())) {
                 String token = this.tokenService.generateToken(user);
@@ -45,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody RegisterRequestDTO body) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequestDTO body) {
         Optional<User> user = this.repository.findByEmail(body.email());
 
         if (user.isEmpty()) {
@@ -63,7 +64,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity forgotPassword(@RequestBody ForgotPasswordRequestDTO body) {
+    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequestDTO body) {
         Optional<User> optionalUser = repository.findByEmail(body.email());
 
         if (optionalUser.isEmpty()) {
@@ -71,7 +72,12 @@ public class AuthController {
         }
 
         User user = optionalUser.get();
-        String token = UUID.randomUUID().toString();
+
+        String token;
+        do {
+            token = tokenGenerator.generateToken(8);
+        } while (repository.findByResetToken(token).isPresent());
+
         user.setResetToken(token);
         user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
         repository.save(user);
@@ -82,7 +88,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity resetPassword(@RequestBody ResetPasswordDTO body) {
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO body) {
         Optional<User> optionalUser = repository.findByResetToken(body.token());
 
         if (optionalUser.isEmpty()) {
@@ -103,4 +109,3 @@ public class AuthController {
         return ResponseEntity.ok("Senha redefinida com sucesso.");
     }
 }
-
