@@ -2,8 +2,7 @@ package com.example.Ramal_back.controllers;
 
 import com.example.Ramal_back.domain.extensions.Extension;
 import com.example.Ramal_back.domain.user.User;
-import com.example.Ramal_back.dto.ExtensionLoginDTO;
-import com.example.Ramal_back.dto.ExtensionResponseDTO;
+import com.example.Ramal_back.dto.*;
 import com.example.Ramal_back.infra.security.TokenService;
 import com.example.Ramal_back.repositories.ExtensionRepository;
 import com.example.Ramal_back.repositories.UserRepository;
