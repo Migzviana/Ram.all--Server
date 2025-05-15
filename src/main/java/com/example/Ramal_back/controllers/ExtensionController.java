@@ -2,20 +2,20 @@ package com.example.Ramal_back.controllers;
 
 import com.example.Ramal_back.domain.extensions.Extension;
 import com.example.Ramal_back.domain.user.User;
-import com.example.Ramal_back.dto.*;
+import com.example.Ramal_back.dto.ExtensionLoginDTO;
+import com.example.Ramal_back.dto.ExtensionResponseDTO;
 import com.example.Ramal_back.infra.security.TokenService;
+import com.example.Ramal_back.infra.service.RangeService;
 import com.example.Ramal_back.repositories.ExtensionRepository;
 import com.example.Ramal_back.repositories.UserRepository;
+import com.example.Ramal_back.infra.service.RangeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/extensions")
@@ -25,12 +25,15 @@ public class ExtensionController {
     private final UserRepository userRepository;
     private final ExtensionRepository extensionRepository;
     private final TokenService tokenService;
+    private final RangeService extensionRangeService;
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllExtensions() {
         try {
             List<Extension> all = extensionRepository.findAll();
             List<ExtensionResponseDTO> response = all.stream()
+                    .filter(ext -> extensionRangeService.isInRange(ext.getExtensionNumber())
+                            || ext.getLoggedUser() != null)
                     .map(ext -> new ExtensionResponseDTO(ext.getExtensionNumber(), ext.getLoggedUser()))
                     .toList();
             return ResponseEntity.ok(response);
@@ -43,13 +46,14 @@ public class ExtensionController {
     public ResponseEntity<?> getAvailableExtension() {
         try {
             List<Extension> available = extensionRepository.findByLoggedUserIsNull();
-            if (available.isEmpty()) {
+            List<ExtensionResponseDTO> response = available.stream()
+                    .filter(ext -> extensionRangeService.isInRange(ext.getExtensionNumber()))
+                    .map(ext -> new ExtensionResponseDTO(ext.getExtensionNumber(), null))
+                    .toList();
+
+            if (response.isEmpty()) {
                 return ResponseEntity.status(404).body(Map.of("message", "Nenhum ramal disponível no momento"));
             }
-
-            List<ExtensionResponseDTO> response = available.stream()
-                    .map(ext -> new ExtensionResponseDTO(ext.getExtensionNumber(), ext.getLoggedUser()))
-                    .toList();
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -58,27 +62,29 @@ public class ExtensionController {
     }
 
     @GetMapping("/range")
-    public ResponseEntity<?> rangeExtensions(@RequestParam int inicio, @RequestParam int fim) {
+    public ResponseEntity<?> getExtensionsInRangeOrLogged() {
         try {
-            if (inicio > fim) {
-                return ResponseEntity.status(404).body(Map.of("message", "Intervalo inválido: Início maior que o fim"));
-            }
-
-            List<String> rangeNumeros = new ArrayList<>();
-            for (int i = inicio; i <= fim; i++) {
-                rangeNumeros.add(String.valueOf(i));
-            }
-
-            List<Extension> extensionsInRange = extensionRepository.findByExtensionNumberIn(rangeNumeros);
-
-            List<ExtensionResponseDTO> response = extensionsInRange.stream()
+            List<Extension> all = extensionRepository.findAll();
+            List<ExtensionResponseDTO> filtered = all.stream()
+                    .filter(ext -> extensionRangeService.isInRange(ext.getExtensionNumber())
+                            || ext.getLoggedUser() != null)
                     .map(ext -> new ExtensionResponseDTO(ext.getExtensionNumber(), ext.getLoggedUser()))
                     .toList();
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(filtered);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("message", "Erro ao buscar ramais no intervalo informado."));
         }
+    }
+
+    @PostMapping("/set-range")
+    public ResponseEntity<?> setRange(@RequestParam int inicio, @RequestParam int fim) {
+        if (inicio > fim) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Início não pode ser maior que o fim."));
+        }
+
+        extensionRangeService.setRange(inicio, fim);
+        return ResponseEntity.ok(Map.of("message", "Intervalo atualizado com sucesso."));
     }
 
     @PostMapping("/login")
