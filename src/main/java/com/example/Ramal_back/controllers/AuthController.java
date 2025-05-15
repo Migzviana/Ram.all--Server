@@ -62,11 +62,11 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody ForgotPasswordRequestDTO body) {
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequestDTO body) {
         Optional<User> optionalUser = repository.findByEmail(body.email());
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("E-mail não encontrado.");
+            return ResponseEntity.badRequest().body(Map.of("message", "E-mail não encontrado."));
         }
 
         User user = optionalUser.get();
@@ -82,39 +82,39 @@ public class AuthController {
 
         emailService.sendResetPasswordEmail(user.getEmail(), token);
 
-        return ResponseEntity.ok("E-mail de recuperação enviado.");
+        return ResponseEntity.ok(Map.of("message", "E-mail de recuperação enviado."));
     }
 
     @PostMapping("/verify-reset-token")
-    public ResponseEntity<String> verifyResetToken(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> verifyResetToken(@RequestBody Map<String, String> body) {
         String token = body.get("token");
         Optional<User> optionalUser = repository.findByResetToken(token);
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("Token inválido.");
+            return ResponseEntity.badRequest().body(Map.of("message", "Token inválido."));
         }
 
         User user = optionalUser.get();
 
         if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("Token expirado.");
+            return ResponseEntity.badRequest().body(Map.of("message", "Token expirado."));
         }
 
-        return ResponseEntity.ok("Token válido.");
+        return ResponseEntity.ok(Map.of("message", "Token válido."));
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDTO body) {
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO body) {
         Optional<User> optionalUser = repository.findByResetToken(body.token());
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.badRequest().body("Token inválido.");
+            return ResponseEntity.badRequest().body(Map.of("message", "Token inválido."));
         }
 
         User user = optionalUser.get();
 
         if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.badRequest().body("Token expirado.");
+            return ResponseEntity.badRequest().body(Map.of("message", "Token expirado."));
         }
 
         user.setPassword(passwordEncoder.encode(body.newPassword()));
@@ -122,6 +122,6 @@ public class AuthController {
         user.setResetTokenExpiry(null);
         repository.save(user);
 
-        return ResponseEntity.ok("Senha redefinida com sucesso.");
+        return ResponseEntity.ok(Map.of("message", "Senha redefinida com sucesso."));
     }
 }
