@@ -9,12 +9,10 @@ import com.example.Ramal_back.infra.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -85,6 +83,24 @@ public class AuthController {
         emailService.sendResetPasswordEmail(user.getEmail(), token);
 
         return ResponseEntity.ok("E-mail de recuperação enviado.");
+    }
+
+    @PostMapping("/verify-reset-token")
+    public ResponseEntity<String> verifyResetToken(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        Optional<User> optionalUser = repository.findByResetToken(token);
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.badRequest().body("Token inválido.");
+        }
+
+        User user = optionalUser.get();
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.badRequest().body("Token expirado.");
+        }
+
+        return ResponseEntity.ok("Token válido.");
     }
 
     @PostMapping("/reset-password")
