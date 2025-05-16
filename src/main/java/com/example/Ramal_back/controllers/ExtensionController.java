@@ -61,21 +61,28 @@ public class ExtensionController {
         }
     }
 
-    @GetMapping("/range")
-    public ResponseEntity<?> getExtensionsInRangeOrLogged() {
+    @GetMapping("/unavailable")
+    public ResponseEntity<?> getUnavailableExtension(){
         try {
-            List<Extension> all = extensionRepository.findAll();
-            List<ExtensionResponseDTO> filtered = all.stream()
-                    .filter(ext -> extensionRangeService.isInRange(ext.getExtensionNumber())
-                            || ext.getLoggedUser() != null)
+            List<Extension> unavailable = extensionRepository.findAll().stream()
+                    .filter(ext -> ext.getLoggedUser() != null)
+                    .filter(ext -> extensionRangeService.isInRange(ext.getExtensionNumber()) || ext.getLoggedUser() != null)
+                    .toList();
+
+            if (unavailable.isEmpty()){
+                return  ResponseEntity.status(404).body(Map.of("message", "Nenhum ramal está sendo utilizado no momento"));
+            }
+
+            List<ExtensionResponseDTO> response = unavailable.stream()
                     .map(ext -> new ExtensionResponseDTO(ext.getExtensionNumber(), ext.getLoggedUser()))
                     .toList();
 
-            return ResponseEntity.ok(filtered);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("message", "Erro ao buscar ramais no intervalo informado."));
+            return ResponseEntity.ok(response);
+        } catch (Exception e){
+            return ResponseEntity.status(500).body(Map.of("message", "Erro ao buscar ramais em uso."));
         }
     }
+
 
     @PostMapping("/set-range")
     public ResponseEntity<?> setRange(@RequestParam int inicio, @RequestParam int fim) {

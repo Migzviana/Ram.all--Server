@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/verify-reset-token").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/reset-password").permitAll()
                         .requestMatchers(HttpMethod.GET, "/extensions/available").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/extensions/unavailable").permitAll()
                         .requestMatchers(HttpMethod.POST, "/extensions/login").authenticated()
                         .requestMatchers(HttpMethod.POST, "/extensions/set-range").permitAll()
                         .requestMatchers(HttpMethod.GET, "/extensions/range").permitAll()

@@ -10,5 +10,4 @@ public interface ExtensionRepository extends JpaRepository<Extension, Long> {
     Optional<Extension> findByLoggedUser_Id(String userId);
     Optional<Extension> findByExtensionNumber(String extensionNumber);
     List<Extension> findByLoggedUserIsNull();
-    List<Extension> findByExtensionNumberIn(List<String> extensionNumbers);
 }
