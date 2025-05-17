@@ -19,6 +19,13 @@ CREATE TABLE `extensions` (
   CONSTRAINT `extensions_ibfk_1` FOREIGN KEY (`logged_user`) REFERENCES `users` (`id`)
 );
 
+CREATE TABLE `extension_range` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `start_range` int NOT NULL,
+  `end_range` int NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
 INSERT INTO `extensions` (`extension_number`, `logged_user`) VALUES
 ('2000', NULL),
 ('2001', NULL),
