@@ -35,6 +35,8 @@ A estrutura do projeto segue o padrão do Spring Boot. Aqui estão algumas pasta
 
 -   `infra/security/`: Contém classes de segurança, como o serviço para gerar e validar tokens JWT.
 
+-   `infra/service/`: Contém classes de serviços, como o serviço para envio de email e o de range para os ramais.
+
 Como Rodar o Projeto
 --------------------
 
