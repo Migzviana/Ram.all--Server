@@ -26,6 +26,7 @@ CREATE TABLE `extension_range` (
   PRIMARY KEY (`id`)
 );
 
+
 INSERT INTO `extensions` (`extension_number`, `logged_user`) VALUES
 ('2000', NULL),
 ('2001', NULL),
